@@ -46,28 +46,28 @@ app.use((req, res, next) => {
 });
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
-app.use((req, res, next) => {
-  const file = fs.readFileSync(
-    path.join(__dirname, "images", "email.ejs"),
-    "utf-8"
-  );
-  var template = ejs.compile(file);
-  var replacements = {
-    url: process.env.API_POINT,
-  };
-  var htmlToSend = template(replacements);
+// app.use((req, res, next) => {
+//   const file = fs.readFileSync(
+//     path.join(__dirname, "images", "email.ejs"),
+//     "utf-8"
+//   );
+//   var template = ejs.compile(file);
+//   var replacements = {
+//     url: process.env.API_POINT,
+//   };
+//   var htmlToSend = template(replacements);
 
-  transport
-    .sendMail({
-      from: "ratedshoubhik96@gmail.com",
-      to: "shoubhik22@gmail.com",
-      subject: "Testing",
-      html: htmlToSend,
-    })
-    .then((result) => console.log(result))
-    .catch((err) => console.log(err));
-  res.send(htmlToSend);
-});
+//   transport
+//     .sendMail({
+//       from: "ratedshoubhik96@gmail.com",
+//       to: "shoubhik22@gmail.com",
+//       subject: "Testing",
+//       html: htmlToSend,
+//     })
+//     .then((result) => console.log(result))
+//     .catch((err) => console.log(err));
+//   res.send(htmlToSend);
+// });
 
 app.use(multer({ storage: fileStorage }).single("image"));
 app.use("/admin", adminRoutes);

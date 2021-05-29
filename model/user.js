@@ -10,6 +10,9 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    resetToken: {
+      type: String,
+    },
     firstName: {
       type: String,
       required: true,

@@ -112,9 +112,9 @@ exports.postLogin = (req, res, next) => {
     });
 };
 exports.postReset = (req, res, next) => {
-  const userId = req.userId;
+  const email = req.body.email;
   let loginUser;
-  User.findById(userId)
+  User.findOne({ email: email })
     .then((user) => {
       if (!user) {
         const error = new Error("user dont exists");
@@ -132,12 +132,17 @@ exports.postReset = (req, res, next) => {
         token: token,
       };
       let htmlToSend = template(replacements);
+      user.resetToken = token;
       transport.sendMail({
         from: "ratedshoubhik96@gmail.com",
         to: loginUser.email,
         subject: "Password Reset",
         html: htmlToSend,
       });
+      return user.save();
+    })
+    .then((user) => {
+      return res.status(200).json({ message: "success" });
     })
     .catch((err) => {
       if (!err.statusCode) {

@@ -17,5 +17,5 @@ routes.post(
   authController.postSignUp
 );
 routes.post("/login", authController.postLogin);
-routes.post("/password-reset", isAuth, authController.postReset);
+routes.post("/password-reset", authController.postReset);
 module.exports = routes;
