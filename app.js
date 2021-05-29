@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const compression = require("compression");
 
 const mongoose = require("mongoose");
 const app = express();
@@ -21,6 +22,7 @@ const authRoutes = require("./routes/auth");
 const cartRoutes = require("./routes/cart");
 const userRoutes = require("./routes/user");
 const orderRoutes = require("./routes/order");
+app.use(compression());
 app.set("view engine", "ejs");
 app.set("views", "views");
 app.use("/images", express.static(path.join(__dirname, "images")));
