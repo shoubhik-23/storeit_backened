@@ -61,7 +61,7 @@ exports.addToCart = (req, res, next) => {
     });
 };
 exports.addLocalToCart = (req, res, next) => {
-  const localCartArray = req.body.localCartArray;
+  const localCartArray = JSON.parse(req.body.localCartArray);
   const userId = req.userId;
   let loginUser;
   User.findById(userId)
@@ -69,13 +69,20 @@ exports.addLocalToCart = (req, res, next) => {
       loginUser = user;
       return Products.find({
         _id: {
-          $in: localCartArray.map((el) => mongoose.Types.ObjectId(el.product)),
+          $in: localCartArray.map((el) =>
+            mongoose.Types.ObjectId(el.product._id)
+          ),
         },
       });
     })
-    .then((result) => loginUser.addLocalToCart(result))
+    .then((result) => {
+      console.log(11, result);
+      return loginUser.addLocalToCart(result);
+    })
     .then(() => res.status(200).json({ message: "success" }))
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      return next(err);
+    });
 };
 exports.deleteFromCart = (req, res, next) => {
   const all = JSON.parse(req.query.all);

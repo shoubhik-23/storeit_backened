@@ -18,6 +18,6 @@ routes.post(
 );
 routes.post("/login", authController.postLogin);
 routes.post("/password-reset", authController.postReset);
-routes.get("/password-reset/:token", authController.getReset);
+routes.post("/newpassword-reset/:token", authController.postNewPassword);
 
 module.exports = routes;

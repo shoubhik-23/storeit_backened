@@ -156,17 +156,23 @@ exports.postReset = (req, res, next) => {
     });
 };
 
-exports.getReset = (req, res, next) => {
-  console.log(4500, req.params.token);
+exports.postNewPassword = (req, res, next) => {
   const token = req.params.token;
+  console.log(45, token);
+  const password = req.body.password;
   User.findOne({ resetToken: token })
-    .then((user) => {
+    .then(async (user) => {
       if (!user) {
         const error = new Error("invalid");
         error.statusCode = 400;
         return next(error);
       }
+      const pass = await bcrypt.hash(password, 5);
+      user.password = pass;
       user.resetToken = null;
+      return user.save();
+    })
+    .then((user) => {
       return res.status(200).json({ message: "success" });
     })
     .catch((err) => {
