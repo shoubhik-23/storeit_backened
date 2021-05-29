@@ -157,7 +157,7 @@ exports.postReset = (req, res, next) => {
 };
 
 exports.getReset = (req, res, next) => {
-  console.log(req.params.token);
+  console.log(4500, req.params.token);
   const token = req.params.token;
   User.findOne({ resetToken: token })
     .then((user) => {
