@@ -1,7 +1,20 @@
 const bcrypt = require("bcryptjs");
 const User = require("../model/user");
 const jwt = require("jsonwebtoken");
+const crypt = require("crypto");
+const path = require("path");
 const { validationResult } = require("express-validator");
+const nodemailer = require("nodemailer");
+const sendrid = require("nodemailer-sendgrid-transport");
+const fs = require("fs");
+const ejs = require("ejs");
+const transport = nodemailer.createTransport(
+  sendrid({
+    auth: {
+      api_key: process.env.MAIL_API,
+    },
+  })
+);
 
 exports.postSignUp = (req, res, next) => {
   const error = validationResult(req);
@@ -87,7 +100,7 @@ exports.postLogin = (req, res, next) => {
         message: "success",
         token: token,
         userId: loginUser._id,
-        name:loginUser.firstName,
+        name: loginUser.firstName,
         email: loginUser.email,
       });
     })
@@ -98,4 +111,38 @@ exports.postLogin = (req, res, next) => {
       return next(err);
     });
 };
-exports.postLogout = (req, res, next) => {};
+exports.postReset = (req, res, next) => {
+  const userId = req.userId;
+  let loginUser;
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        const error = new Error("user dont exists");
+        error.statusCode = 406;
+        throw error;
+      }
+      loginUser = { ...user.toObject() };
+      const token = crypt.randomBytes(10);
+      const htmlFile = fs.readFileSync(
+        path.join(__dirname, "../", "images", "email.ejs"),
+        { encoding: "utf-8" }
+      );
+      let template = ejs.compile(htmlFile);
+      let replacements = {
+        token: token,
+      };
+      let htmlToSend = template(replacements);
+      transport.sendMail({
+        from: "ratedshoubhik96@gmail.com",
+        to: loginUser.email,
+        subject: "Password Reset",
+        html: htmlToSend,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+        return next(err);
+      }
+    });
+};
