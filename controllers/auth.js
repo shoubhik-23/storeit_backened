@@ -119,29 +119,53 @@ exports.postReset = (req, res, next) => {
       if (!user) {
         const error = new Error("user dont exists");
         error.statusCode = 406;
-        throw error;
+        return next(error);
       }
       loginUser = { ...user.toObject() };
-      const token = crypt.randomBytes(10);
-      const htmlFile = fs.readFileSync(
-        path.join(__dirname, "../", "images", "email.ejs"),
-        { encoding: "utf-8" }
-      );
-      let template = ejs.compile(htmlFile);
-      let replacements = {
-        token: token,
-      };
-      let htmlToSend = template(replacements);
-      user.resetToken = token;
-      transport.sendMail({
-        from: "ratedshoubhik96@gmail.com",
-        to: loginUser.email,
-        subject: "Password Reset",
-        html: htmlToSend,
+      crypt.randomBytes(32, (err, buffer) => {
+        if (err) {
+          return res.status(404).json({ message: "internal unknown error" });
+        }
+        const token = buffer.toString("hex");
+        const htmlFile = fs.readFileSync(
+          path.join(__dirname, "../", "images", "email.ejs"),
+          { encoding: "utf-8" }
+        );
+        let template = ejs.compile(htmlFile);
+        let replacements = {
+          token: token,
+        };
+        let htmlToSend = template(replacements);
+        user.resetToken = token;
+        transport.sendMail({
+          from: "ratedshoubhik96@gmail.com",
+          to: loginUser.email,
+          subject: "Password Reset",
+          html: htmlToSend,
+        });
+        return user.save().then((user) => {
+          return res.status(200).json({ message: "success" });
+        });
       });
-      return user.save();
     })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+        return next(err);
+      }
+    });
+};
+
+exports.getReset = (req, res, next) => {
+  const token = req.params.token;
+  User.findOne({ resetToken: token })
     .then((user) => {
+      if (!user) {
+        const error = new Error("invalid");
+        error.statusCode = 400;
+        return next(error);
+      }
+      user.resetToken = null;
       return res.status(200).json({ message: "success" });
     })
     .catch((err) => {
