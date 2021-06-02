@@ -37,6 +37,7 @@ app.use(compression());
 app.set("view engine", "ejs");
 app.set("views", "views");
 app.use("/images", express.static(path.join(__dirname, "images")));
+app.use(express.static(path.join(__dirname, "invoices")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -46,6 +47,17 @@ app.use((req, res, next) => {
 });
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
+// app.use((req, res, next) => {
+//   console.log(80);
+//   const data = fs.readFileSync(
+//     path.join(__dirname, "images", "logo.png"),
+//     "base64"
+//   );
+//   console.log(data);
+//   res.setHeader("Content-Type", "image/png");
+//   res.send(data);
+//   next();
+// });
 
 app.use(multer({ storage: fileStorage }).single("image"));
 app.use("/admin", adminRoutes);
