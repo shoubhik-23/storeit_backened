@@ -93,8 +93,7 @@ exports.postLogin = (req, res, next) => {
       }
       const token = jwt.sign(
         { userId: loginUser._id, email: loginUser.email },
-        "secretkeysecret",
-        { expiresIn: "24h" }
+        "secretkeysecret"
       );
       return res.status(200).json({
         message: "success",

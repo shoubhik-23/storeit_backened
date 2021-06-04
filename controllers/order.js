@@ -30,6 +30,13 @@ exports.postOrder = (req, res, next) => {
       return order.save();
     })
     .then((result) => {
+      const invoiceName = `${order._id}.pdf`;
+      const doc = new PDF();
+      doc.pipe(
+        fs.createWriteStream(
+          path.join(__dirname, "..", "invoices", invoiceName)
+        )
+      );
       return res.status(200).json({ message: "success" });
     })
     .catch((err) => {
@@ -84,7 +91,6 @@ exports.getInvoice = (req, res, next) => {
           path.join(__dirname, "..", "invoices", invoicePath)
         )
       );
-      pdfDoc.pipe(res);
       pdfDoc.image(path.join(__dirname, "..", "images", "logo.png"), 20, 20, {
         height: 40,
         width: 200,
@@ -111,6 +117,11 @@ exports.getInvoice = (req, res, next) => {
       });
 
       pdfDoc.end();
+
+      res.status(200).json({
+        message: "success",
+        data: `${invoicePath}`,
+      });
     })
     .catch((err) => {
       if (!err.statusCode) {
